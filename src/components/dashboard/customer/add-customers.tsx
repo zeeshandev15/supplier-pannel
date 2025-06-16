@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useAppDispatch } from '@/redux/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PhotoCamera } from '@mui/icons-material';
 import {
@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import * as z from 'zod';
 
 import { CustomerDefaultValues, CustomerFormValues, customerSchema } from '@/lib/(schemas)/customer.schema';
 import { createCustomer, updateCustomers } from '@/lib/api/auth/customersApi';
@@ -86,8 +85,6 @@ export default function AddCustomerForm({ fetchData, editProduct, setEditProduct
     if (data.image instanceof File) {
       formData.append('image', data.image);
     }
-
-
 
     try {
       if (editProduct) {

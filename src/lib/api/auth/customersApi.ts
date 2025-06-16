@@ -1,7 +1,5 @@
-import { createUnarySpacing } from '@mui/system';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import { CustomerFormValues } from '@/lib/(schemas)/customer.schema';
 import axiosInstance from '@/lib/axios/axiosInstance';
 
 export const createCustomer = createAsyncThunk('create/customer', async (formData: FormData, thunkAPI) => {
