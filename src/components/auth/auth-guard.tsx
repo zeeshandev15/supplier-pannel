@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Alert from '@mui/material/Alert';
 
-import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { useUser } from '@/hooks/use-user';
 
@@ -29,7 +28,7 @@ export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | nul
 
     if (!user) {
       logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in');
-      router.replace(paths.auth.signIn);
+      router.replace('/dashboard');
       return;
     }
 
