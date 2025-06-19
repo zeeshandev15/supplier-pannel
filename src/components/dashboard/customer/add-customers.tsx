@@ -43,21 +43,6 @@ export default function AddCustomerForm({ fetchData, editProduct, setEditProduct
     defaultValues: CustomerDefaultValues,
   });
 
-  useEffect(() => {
-    if (editProduct) {
-      setOpen(true);
-      setValue('name', editProduct.name || '');
-      setValue('location', editProduct.location || '');
-      setValue('phone', editProduct.phone || '');
-      setValue('email', editProduct.email || '');
-      setValue('joinedDate', editProduct.joinedDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
-
-      if (editProduct.image) {
-        setPreview(`http://localhost:8001/${editProduct.image}`);
-      }
-    }
-  }, [editProduct, setValue]);
-
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {

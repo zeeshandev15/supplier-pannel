@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAppDispatch } from '@/redux/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PhotoCamera } from '@mui/icons-material';
 import {
@@ -15,37 +16,31 @@ import {
   TextField,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import { toast } from 'react-toastify';
 
-const itemSchema = z.object({
-  title: z.string().min(2, 'Title must be at least 2 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  updatedAt: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid date'),
-  image: z.instanceof(File).optional(),
-});
+import { ProductDefaultValues, ProductFormValues, productSchema } from '@/lib/(schemas)/productSchema';
+import { createProduct, updateProducts } from '@/lib/api/auth/productsApi';
 
-type Item = z.infer<typeof itemSchema>;
+interface AddItemFormProps {
+  fetchData: () => void;
+  editproduct: any;
+}
 
-export default function AddItemForm() {
+export default function AddItemForm({ fetchData, editproduct }: AddItemFormProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
-  } = useForm<Item>({
-    resolver: zodResolver(itemSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      updatedAt: new Date().toISOString().split('T')[0],
-    },
+    reset,
+  } = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: ProductDefaultValues,
   });
-
-  const imageFile = watch('image');
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -55,11 +50,66 @@ export default function AddItemForm() {
     }
   };
 
-  const onSubmit = (data: Item) => {
-    console.log('New Item:', data);
-    setOpen(false);
-  };
+  useEffect(() => {
+    if (editproduct) {
+      setOpen(true);
+      const keys = ['title', 'description', 'price', 'image'] as const;
+      keys.forEach((key) => {
+        setValue(key, editproduct[key] || '');
+      });
 
+      if (editproduct.date) {
+        setValue('date', editproduct.date?.split('T')[0] || new Date().toISOString().split('T')[0]);
+      }
+      if (editproduct.image) {
+        setPreview(`http://localhost:8001/${editproduct.image}`);
+      }
+    }
+  }, [editproduct, setValue]);
+
+  const onSubmit = async (data: ProductFormValues) => {
+    const formData = new FormData();
+    (Object.keys(data) as (keyof ProductFormValues)[]).forEach((key) => {
+      if (key !== 'image') {
+        formData.append(key, data[key]);
+      }
+    });
+    if (data.image instanceof File) {
+      formData.append('image', data.image);
+    }
+
+    try {
+      if (editproduct) {
+        const actionResult = await dispatch(updateProducts({ id: editproduct._id, data: formData }));
+        if (updateProducts.fulfilled.match(actionResult)) {
+          toast.success('Product Update Successfully');
+          fetchData();
+
+          if (actionResult.payload.product?.image) {
+            setPreview(`http://localhost:8001/${actionResult.payload.product.image}`);
+          }
+          reset();
+          setOpen(false);
+        } else {
+          toast.error('Failed to update product');
+        }
+      } else {
+        const resultAction = await dispatch(createProduct(formData));
+        if (createProduct.fulfilled.match(resultAction)) {
+          toast.success(resultAction.payload.message);
+          setOpen(false);
+          fetchData();
+        } else {
+          toast.error(resultAction.payload as string) || 'Something went wrong';
+        }
+        reset();
+        setOpen(false);
+        fetchData();
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
   return (
     <>
       <Button variant="contained" onClick={() => setOpen(true)} sx={{ backgroundColor: '#6366F1', color: '#fff' }}>
@@ -103,11 +153,20 @@ export default function AddItemForm() {
               rows={3}
             />
             <TextField
+              label="Price"
+              {...register('price')}
+              error={!!errors.price}
+              helperText={errors.price?.message}
+              fullWidth
+              multiline
+              rows={1}
+            />
+            <TextField
               label="Updated At"
               type="date"
-              {...register('updatedAt')}
-              error={!!errors.updatedAt}
-              helperText={errors.updatedAt?.message}
+              {...register('date')}
+              error={!!errors.date}
+              helperText={errors.date?.message}
               fullWidth
             />
 
@@ -116,7 +175,7 @@ export default function AddItemForm() {
                 Cancel
               </Button>
               <Button type="submit" variant="contained" sx={{ backgroundColor: '#6366F1', color: '#fff' }}>
-                Add Item
+                {editproduct ? 'Update Item' : 'Add Item'}
               </Button>
             </DialogActions>
           </Box>
