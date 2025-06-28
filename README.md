@@ -1,6 +1,11 @@
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
-
-> Free React Admin Dashboard made with [MUI's](https://mui.com) components, [React](https://reactjs.org) and of course [Next.js](https://github.com/vercel/next.js) to boost your app development process!
+<div align="center">
+  <br />
+    <a href="https://youtu.be/lEflo_sc82g?feature=shared" target="_blank">
+      <img src="https://github.com/zeeshandev15/supplier-pannel/blob/master/supplier%20pannel%20design.png" alt="Project Banner">
+    </a>
+  <br />
+</div>
+  <div>
 
 ## Pages
 
@@ -15,8 +20,6 @@
 - [Sign In](https://material-kit-react.devias.io/auth/sign-in)
 - [Sign Up](https://material-kit-react.devias.io/auth/sign-up)
 - [Reset Password](https://material-kit-react.devias.io/auth/reset-password)
-
-                      |
 
 ## Quick start
 
